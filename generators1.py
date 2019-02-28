@@ -29,6 +29,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
             mode = "INCREASING"
         elif cur>load:
             mode = "DECREASING"
+        else:
+            mode = "LEVEL"
         
         if mode == "INCREASING":
             while cur<load:
@@ -71,6 +73,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
             
         run.sort()
         not_run.sort()
+
         print "t =",t
         print "load: ", load
         print "current capacity: ", cur 
