@@ -51,6 +51,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
                     run.append(temp)
                 else:
                     print "Cannot meet load"
+		    print "current req load: ", load
+		    print "current produced: ", cur
                     t = total_time+1 ##indicator that you should quit
                     break;
         elif mode == "DECREASING":
