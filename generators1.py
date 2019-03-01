@@ -25,6 +25,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
     hor = []
     t = 0
     lst = []
+    total_cost_return = 0
     for row in range(total_time):
         lst1 = []
         for col in range(len(not_run)):
@@ -167,7 +168,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
             print id[wq],
         print " "
         print " "
-    return lst
+	total_cost_return += cost
+    return lst, total_cost_return
 
 
 #reading the csv and setting values to arrays for different coloumns 	
@@ -269,8 +271,9 @@ running = []
 not_running = generators_cost[:]
 
 total_time = len(load_schedule)+3
-schedule = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
+schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
 for x in schedule:
     print x
+##print "Total cost: ", t_cost
 
         
