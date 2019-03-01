@@ -39,7 +39,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
     cost = 0
     off = {}
     while True:
-        
+        t = t+1
 	cur = 0
 	cost = 0
 	for gen in run:
@@ -75,7 +75,6 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 	    
 	##print "cur_cap2 after clearing: ", cur_cap2
 	##print "cur_cap after copying: ", cur_cap	
-        t = t+1
         if t>=total_time:
             break;
 	load = load_sch[i]
