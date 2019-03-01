@@ -36,6 +36,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
     cur_cap = {}
     cur_cap2 = {}
     cost = 0
+    off = {}
     while True:
         
 	cur = 0
@@ -49,6 +50,28 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
         cur_cap = {}
 	cur_cap = cur_cap2.copy()
 	cur_cap2 = {}
+	
+	for key,val in off.items():
+	    for key,val in off.items():
+		print "Turning on id: ",key
+		lst[t][key] = 1	    
+	    print "off is: ", off
+	    if off[key] <= ramp_down[key]:
+		for running_cost__, ids__ in id.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+		    if key == ids__:
+			cost += (off[key])*(running_cost__)
+			cur += off[key]
+			del off[key]
+	    else:
+		for running_cost__, ids__ in id.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
+		    if key == ids__:
+			tmp = off[key]
+			cost += (ramp_down[key])*(running_cost__)
+			cur += ramp_down[key]
+			off[key] = tmp - ramp_down[key]
+		
+		
+	    
 	##print "cur_cap2 after clearing: ", cur_cap2
 	##print "cur_cap after copying: ", cur_cap	
         t = t+1
@@ -102,10 +125,13 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 		    ##print "run :", run
 		    ##print "not run: ", not_run
                     temp = run.pop(len(run)-1)
-		    
                     cur -= cur_cap[id[temp]]
-                    cost -= temp*cur_cap[id[temp]]
-		    
+		    cost -= temp*cur_cap[id[temp]]
+		    if ramp_down[id[temp]] < cur_cap[id[temp]]:
+			off[id[temp]] = cur_cap[id[temp]] - ramp_down[id[temp]]
+			cur += ramp_down[id[temp]]
+			cost += temp*(ramp_down[id[temp]])
+                    
 		    tmp_key, tmp_val = id[temp], cur_cap[id[temp]]
 		    del cur_cap[id[temp]]
                     not_run.append(temp)
