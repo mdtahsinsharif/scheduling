@@ -54,9 +54,9 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 	
 	for key,val in off.items():
 	    for key,val in off.items():
-		print "Turning on id: ",key
+		##print "Turning off id: ",key
 		lst[t][key] = 1	    
-	    print "off is: ", off
+	    ##print "off is: ", off
 	    if off[key] <= ramp_down[key]:
 		for running_cost__, ids__ in id.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
 		    if key == ids__:
@@ -78,10 +78,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
         t = t+1
         if t>=total_time:
             break;
-	if i>1:
-	    load = load_sch[i-2]
-	else:
-	    load = load_sch[0]
+	load = load_sch[i]
+
         i = i+1; ##for getting the load req
         
         
@@ -150,7 +148,9 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
         for k in range(len(not_run)):
             lst[t][id[not_run[k]]-1] = 0
         
-        
+	for key,val in off.items():
+	    print "Turning on id: ", key
+	    lst[t][key] = 1	            
             
         run.sort()
         not_run.sort()
@@ -270,10 +270,16 @@ generators_cost.sort()
 running = []
 not_running = generators_cost[:]
 
-total_time = len(load_schedule)+3
+total_time = len(load_schedule)
 schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
 for x in schedule:
     print x
 ##print "Total cost: ", t_cost
+count_t = 0
+for x in schedule:
+    for y in x:
+	if y==1:
+	    count_t = count_t + 1
+print "Total on generators: ", count_t
 
         
