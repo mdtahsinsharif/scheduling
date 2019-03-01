@@ -1,8 +1,13 @@
 import pandas as pd
 import numpy as np
 
+def add_capacity_rampup(cap, ramp_up, ids, addGen):
+    if cap[ids[addGen]] <= ramp_up[ids[addGen]]:
+	return cap[ids[addGen]]
+    else:
+	return ramp_up[ids[addGen]]
 
-def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
+def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, ramp_down):
     sch = []
     cur = 0
     load = 0
@@ -27,6 +32,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
             break;
         load = load_sch[i]
         i = i+1; ##for getting the load req
+        
+        
         if cur<load:
             mode = "INCREASING"
         elif cur>load:
@@ -38,8 +45,9 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
             while cur<load:
                 if len(not_run)>0:
                     temp = not_run.pop(0)
-                    cur += capacity[id[temp]]
-                    cost += temp
+                    ##cur += capacity[id[temp]]
+                    cur += add_capacity_rampup(capacity, ramp_up, id, temp)
+                    cost += add_capacity_rampup(capacity, ramp_up, id, temp)*temp
                     run.append(temp)
                 else:
                     print "Cannot meet load"
@@ -56,12 +64,12 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
                 while cur>=load:
                     temp = run.pop(len(run)-1)
                     cur -= capacity[id[temp]]
-                    cost -= temp
+                    cost -= temp*capacity[id[temp]]
                     not_run.append(temp)
                 t1 = not_run.pop(len(not_run)-1)
                 cur += capacity[id[t1]]
                 run.append(t1)
-                cost += t1
+                cost += t1*capacity[id[t1]]
         
         if t>=len(lst) or t>=total_time:
             break
@@ -164,13 +172,17 @@ for n in csv_ramp_down:
 generator_id_map = {}
 for ii in range(len(generators_cost)):
     generator_id_map[generators_cost[ii]] = generator_ids[ii];
-    
 
+generator_rampup_map = {}
+for ii in range(len(generators_cost)):
+    generator_rampup_map[generator_id_map[generators_cost[ii]]] = ramp_up[ii]
+
+generator_rampdown_map = {}
+for ii in range(len(generators_cost)):
+    generator_rampdown_map[generator_id_map[generators_cost[ii]]] = ramp_down[ii]
 
 generators_capacity = {}
 prev = 0;
-
-
 
 print "Length of gen cost: ", len(generators_cost)
 print "Length of gen capacities: ", len(generators_capacities_given)
@@ -187,7 +199,7 @@ running = []
 not_running = generators_cost[:]
 
 total_time = 25
-schedule = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time)
+schedule = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
 for x in schedule:
     print x
 
