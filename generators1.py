@@ -1,6 +1,6 @@
-from xlrd import open_workbook 
 import pandas as pd
 import numpy as np
+
 
 def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
     sch = []
@@ -92,21 +92,27 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time):
     return lst
 
 
+#reading the csv and setting values to arrays for different coloumns 	
+	
 csvCol = pd.read_csv('./data/gen_data.csv')
 
 csv_generators_capacities_given = csvCol['Capacity (MW)']
 csv_generator_ids = csvCol['Generator Number']
 csv_generators_cost = csvCol['Cost curve segment 1 coefficient ($/MW)']
 csv_load_schedule = csvCol['Load  (MW)']
-
+csv_ramp_up = csvCol['Ramp up (MW/h)']
+csv_ramp_down = csvCol['Ramp down (MW/h)']
 
 
 generators_capacities_given = []
 generator_ids = []
 generators_cost = []
 load_schedule = []
+ramp_up = []
+ramp_down = []
 
 
+#converting csv arrays to local lists
 
 for i in csv_generators_capacities_given:
 	if (np.isnan(i)):
@@ -127,18 +133,34 @@ for l in csv_load_schedule:
 	if (np.isnan(l)):
 		break
 	load_schedule.append(l)
-
+	
+for m in csv_ramp_up:
+	if (np.isnan(m)):
+		break
+	ramp_up.append(m)
+	
+for n in csv_ramp_down:
+	if (np.isnan(n)):
+		break
+	ramp_down.append(n)
+	
+	
+### --------------- DEBUG CODE -----------###	
 #print generators_capacities_given
 #print generator_ids
 #print generators_cost
 #print load_schedule
+#print ramp_up
+#print ramp_down
 	
 #generators_capacities_given = [20,76,20,76,100,100,197,197,12,155,155,400,400,50,155,350];
 #generator_ids = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
 #generators_cost = [28.967,18.433,28.947,18.403,17.5904,17.6004,17.1925,17.2125,29.453,23.8096,23.8196,6.960789,6.970789,28.313,23.8296,26.2131]
 #load_schedule = [1206,1134,1080,1062,1062,1080,1332,1548,1710,1728,1728,1710,1710,1710,1674,1692,1782,1800,1800,1728,1638,1494,1413,1134];	
 	
-
+### ------------- END DEBUG CODE ----------###
+	
+	
 generator_id_map = {}
 for ii in range(len(generators_cost)):
     generator_id_map[generators_cost[ii]] = generator_ids[ii];
