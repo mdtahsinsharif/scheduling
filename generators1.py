@@ -1,6 +1,15 @@
 import pandas as pd
 import numpy as np
 
+def update_capacity(cur_cap,ramp_up,id,addGen,capacity):
+    if capacity[id[addGen]] <= ramp_up[id[addGen]]:
+	return capacity[id[addGen]], capacity[id[addGen]]*addGen
+    else:
+	if ramp_up[id[addGen]]+cur_cap[id[addGen]] > capacity[id[addGen]]:
+	    return capacity[id[addGen]], capacity[id[addGen]]*addGen
+	else:
+	    return ramp_up[id[addGen]]+cur_cap[id[addGen]], (ramp_up[id[addGen]]+cur_cap[id[addGen]])*addGen
+
 def add_capacity_rampup(cap, ramp_up, ids, addGen):
     if cap[ids[addGen]] <= ramp_up[ids[addGen]]:
 	return cap[ids[addGen]]
@@ -24,13 +33,31 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
             
     ## Time 0
     
-    
+    cur_cap = {}
+    cur_cap2 = {}
     cost = 0
     while True:
+        
+	cur = 0
+	cost = 0
+	for gen in run:
+	    cur_cap2[id[gen]], cost_ = update_capacity(cur_cap,ramp_up,id,gen,capacity)
+	    cost += cost_
+	    cur += cur_cap2[id[gen]] 
+	##print "cur_cap2: ", cur_cap2
+	##print "cur_cap: ", cur_cap
+        cur_cap = {}
+	cur_cap = cur_cap2.copy()
+	cur_cap2 = {}
+	##print "cur_cap2 after clearing: ", cur_cap2
+	##print "cur_cap after copying: ", cur_cap	
         t = t+1
-        if i>=len(load_sch):
+        if t>=total_time:
             break;
-        load = load_sch[i]
+	if i>1:
+	    load = load_sch[i-2]
+	else:
+	    load = load_sch[0]
         i = i+1; ##for getting the load req
         
         
@@ -42,12 +69,15 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
             mode = "LEVEL"
         
         if mode == "INCREASING":
+	    print " "
+	    print "---Load was more than Current Load-----"
             while cur<load:
                 if len(not_run)>0:
                     temp = not_run.pop(0)
                     ##cur += capacity[id[temp]]
-                    cur += add_capacity_rampup(capacity, ramp_up, id, temp)
-                    cost += add_capacity_rampup(capacity, ramp_up, id, temp)*temp
+		    cur_cap[id[temp]] = add_capacity_rampup(capacity, ramp_up, id, temp)
+                    cur += cur_cap[id[temp]]
+                    cost += cur_cap[id[temp]]*temp
                     run.append(temp)
                 else:
                     print "Cannot meet load"
@@ -56,6 +86,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
                     t = total_time+1 ##indicator that you should quit
                     break;
         elif mode == "DECREASING":
+	    print " "
+	    print "---Load was less than Current Load-----"
             if load <= 0:
                 while len(run)>0:
                     temp = run.pop(len(run)-1)
@@ -63,17 +95,27 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
                     cur = 0
                 cost = 0
             else:
+		tmp = 0
+		tmp_val = 0
                 while cur>=load:
+		    ##print " load: ", load, "cur: ", cur
+		    ##print "run :", run
+		    ##print "not run: ", not_run
                     temp = run.pop(len(run)-1)
-                    cur -= capacity[id[temp]]
-                    cost -= temp*capacity[id[temp]]
+		    
+                    cur -= cur_cap[id[temp]]
+                    cost -= temp*cur_cap[id[temp]]
+		    
+		    tmp_key, tmp_val = id[temp], cur_cap[id[temp]]
+		    del cur_cap[id[temp]]
                     not_run.append(temp)
                 t1 = not_run.pop(len(not_run)-1)
+		cur_cap[id[t1]] = tmp_val
                 cur += capacity[id[t1]]
                 run.append(t1)
                 cost += t1*capacity[id[t1]]
         
-        if t>=len(lst) or t>=total_time:
+        if t>=total_time:
             break
         
         for j in range(len(run)):
@@ -200,7 +242,7 @@ generators_cost.sort()
 running = []
 not_running = generators_cost[:]
 
-total_time = 25
+total_time = len(load_schedule)+3
 schedule = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
 for x in schedule:
     print x
