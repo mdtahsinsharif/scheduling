@@ -190,7 +190,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 
 #reading the csv and setting values to arrays for different coloumns 	
 	
-csvCol = pd.read_csv('./data/gen_data_instance_0.csv')
+csvCol = pd.read_csv('./data/gen_data_instance_10.csv')
 
 csv_generators_capacities_given = csvCol['Capacity (MW)']
 csv_generator_ids = csvCol['Generator Number']
@@ -290,14 +290,27 @@ not_running = generators_cost[:]
 
 total_time = len(load_schedule)
 schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map, len(not_running))
+ti = 0
+print "   ",
+for ty in range(len(generator_ids)):
+    print str(generator_ids[ty]),
+    print "",
+print ""
 for x in schedule:
+    if ti < 10:
+	print "0"+str(ti),
+    else:
+	print str(ti),
     print x
+    ti = ti+1
 ##print "Total cost: ", t_cost
 count_t = 0
+
 for x in schedule:
     for y in x:
 	if y==1:
 	    count_t = count_t + 1
+print " "
 print "Total on generators: ", count_t
 print "total cost of running: ", t_cost
 
