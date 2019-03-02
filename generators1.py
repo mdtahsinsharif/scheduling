@@ -16,7 +16,7 @@ def add_capacity_rampup(cap, ramp_up, ids, addGen):
     else:
 	return ramp_up[ids[addGen]]
 
-def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, ramp_down):
+def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, ramp_down, all_gen_size):
     sch = []
     cur = 0
     load = 0
@@ -26,7 +26,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
     t = 0
     lst = []
     total_cost_return = 0
-    for row in range(total_time):
+    for row in range(total_time+1):
         lst1 = []
         for col in range(len(not_run)):
             lst1.append(0)
@@ -40,8 +40,11 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
     off = {}
     while True:
         t = t+1
+	if t>total_time:
+	    break;	
 	cur = 0
 	cost = 0
+	##print run
 	for gen in run:
 	    cur_cap2[id[gen]], cost_ = update_capacity(cur_cap,ramp_up,id,gen,capacity)
 	    cost += cost_
@@ -55,7 +58,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 	for key,val in off.items():
 	    for key,val in off.items():
 		##print "Turning off id: ",key
-		lst[t][key] = 1	    
+		##print "list: ", lst
+		lst[t][key-1] = 1	    
 	    ##print "off is: ", off
 	    if off[key] <= ramp_down[key]:
 		for running_cost__, ids__ in id.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
@@ -75,8 +79,7 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 	    
 	##print "cur_cap2 after clearing: ", cur_cap2
 	##print "cur_cap after copying: ", cur_cap	
-        if t>=total_time:
-            break;
+        
 	load = load_sch[i]
 
         i = i+1; ##for getting the load req
@@ -104,7 +107,15 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
                     print "Cannot meet load"
 		    print "current req load: ", load
 		    print "current produced: ", cur
-                    t = total_time+1 ##indicator that you should quit
+                    ##t = t-1 ##indicator that you should quit
+                    i = i-1
+		    total_time = total_time + 1
+		    lst11 = []
+		    ##print lst
+		    for col1 in range(all_gen_size):
+			lst11.append(0)
+		    lst.append(lst11)	
+		    ##print lst
                     break;
         elif mode == "DECREASING":
 	    print " "
@@ -118,18 +129,23 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
             else:
 		tmp = 0
 		tmp_val = 0
-                while cur>=load:
+                while cur>=load and len(run)>0:
 		    ##print " load: ", load, "cur: ", cur
 		    ##print "run :", run
 		    ##print "not run: ", not_run
                     temp = run.pop(len(run)-1)
+		    ##print "load: ", load
+		    ##print "curr: ", cur
+                    ##print temp
                     cur -= cur_cap[id[temp]]
 		    cost -= temp*cur_cap[id[temp]]
 		    if ramp_down[id[temp]] < cur_cap[id[temp]]:
 			off[id[temp]] = cur_cap[id[temp]] - ramp_down[id[temp]]
-			cur += ramp_down[id[temp]]
-			cost += temp*(ramp_down[id[temp]])
-                    
+			cur += cur_cap[id[temp]]
+			cur -= ramp_down[id[temp]]
+			cost += temp*cur_cap[id[temp]]
+			cost -= temp*(ramp_down[id[temp]])
+                    ##print off
 		    tmp_key, tmp_val = id[temp], cur_cap[id[temp]]
 		    del cur_cap[id[temp]]
                     not_run.append(temp)
@@ -139,8 +155,8 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
                 run.append(t1)
                 cost += t1*capacity[id[t1]]
         
-        if t>=total_time:
-            break
+        ##if t>total_time:
+          ##  break
         
         for j in range(len(run)):
             lst[t][id[run[j]]-1] = 1
@@ -148,12 +164,13 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
             lst[t][id[not_run[k]]-1] = 0
         
 	for key,val in off.items():
-	    print "Turning on id: ", key
-	    lst[t][key] = 1	            
+	    #print "Turning on id: ", key
+	    lst[t][key-1] = 1	            
             
         run.sort()
         not_run.sort()
-
+	
+	print " "
         print "t =",t
         print "load: ", load
         print "current capacity: ", cur 
@@ -173,12 +190,12 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 
 #reading the csv and setting values to arrays for different coloumns 	
 	
-csvCol = pd.read_csv('./data/gen_data.csv')
+csvCol = pd.read_csv('./data/gen_data_instance_0.csv')
 
 csv_generators_capacities_given = csvCol['Capacity (MW)']
 csv_generator_ids = csvCol['Generator Number']
-csv_generators_cost = csvCol['Cost curve segment 1 coefficient ($/MW)']
-csv_load_schedule = csvCol['Load  (MW)']
+csv_generators_cost = csvCol['Cost ($/MW)']
+csv_load_schedule = csvCol['Load (MW)']
 csv_ramp_up = csvCol['Ramp up (MW/h)']
 csv_ramp_down = csvCol['Ramp down (MW/h)']
 
@@ -198,10 +215,11 @@ for i in csv_generators_capacities_given:
 		break
 	generators_capacities_given.append(i)
 	
-for j in csv_generator_ids:
-	if (np.isnan(j)):
-		break
-	generator_ids.append(int(j))
+for j in range(len(generators_capacities_given)):
+	##print csv_generator_ids
+	##if (np.isnan(j)):
+	##	break
+	generator_ids.append(int(j+1))
 	
 for k in csv_generators_cost:
 	if (np.isnan(k)):
@@ -212,7 +230,7 @@ for l in csv_load_schedule:
 	if (np.isnan(l)):
 		break
 	load_schedule.append(l)
-	
+##print load_schedule
 for m in csv_ramp_up:
 	if (np.isnan(m)):
 		break
@@ -268,9 +286,10 @@ generators_cost.sort()
 
 running = []
 not_running = generators_cost[:]
+##print not_running
 
 total_time = len(load_schedule)
-schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map)
+schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map, len(not_running))
 for x in schedule:
     print x
 ##print "Total cost: ", t_cost
@@ -280,5 +299,6 @@ for x in schedule:
 	if y==1:
 	    count_t = count_t + 1
 print "Total on generators: ", count_t
+print "total cost of running: ", t_cost
 
         
