@@ -334,7 +334,8 @@ for x in schedule:
 print " "
 print "Total on generators: ", count_t
 print "total cost of running: ", t_cost
-wb.save('/results/Output_Matrices_instance_' + str(instance)) 
-
 print("--- %s seconds ---" % (time.time() - start_time))
+wb.save('Output_Matrices_instance_' + str(instance)) 
+
+
         
