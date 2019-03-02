@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import time
+import xlwt 
+from xlwt import Workbook 
 
 def update_capacity(cur_cap,ramp_up,id,addGen,capacity):
     if capacity[id[addGen]] <= ramp_up[id[addGen]]:
@@ -189,8 +192,9 @@ def prepare_schedule(load_sch, run, not_run, capacity, id, total_time, ramp_up, 
 
 
 #reading the csv and setting values to arrays for different coloumns 	
-	
-csvCol = pd.read_csv('./data/gen_data_instance_4.csv')
+start_time = time.time()
+instance = 10
+csvCol = pd.read_csv('./data/gen_data_instance_' + str(instance) + '.csv')
 
 csv_generators_capacities_given = csvCol['Capacity (MW)']
 csv_generator_ids = csvCol['Generator Number']
@@ -287,24 +291,38 @@ generators_cost.sort()
 running = []
 not_running = generators_cost[:]
 ##print not_running
+wb = Workbook() 
+sheet1 = wb.add_sheet('Output_instance_' + str(instance)) 
 
 total_time = len(load_schedule)
 schedule, t_cost = prepare_schedule(load_schedule, running, not_running, generators_capacity, generator_id_map, total_time, generator_rampup_map, generator_rampdown_map, len(not_running))
 ti = 0
 print "   ",
+
+
 for ty in range(len(generator_ids)):
     print str(generator_ids[ty]),
+    sheet1.write(generator_ids[ty], 0, generator_ids[ty])
     print "",
 print ""
 ti = total_time+1 - len(schedule)
-for x in schedule:
+row_excel = 1
+col = 0
+for x in range(len(schedule)):
     if ti<0:
+	sheet1.write(col,row_excel,str(ti))
 	print str(ti),
     elif ti < 10:
+	sheet1.write(col,row_excel,str(ti))
 	print "0"+str(ti),
     else:
+	sheet1.write(col,row_excel,str(ti))
 	print str(ti),
-    print x
+    for y in range(len(schedule[x])):
+	sheet1.write(y+1,row_excel,schedule[x][y])
+	print schedule[x][y],"",
+    print ""
+    row_excel = row_excel+1;
     ti = ti+1
 ##print "Total cost: ", t_cost
 count_t = 0
@@ -316,5 +334,7 @@ for x in schedule:
 print " "
 print "Total on generators: ", count_t
 print "total cost of running: ", t_cost
+wb.save('/results/Output_Matrices_instance_' + str(instance)) 
 
+print("--- %s seconds ---" % (time.time() - start_time))
         

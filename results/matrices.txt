@@ -31,7 +31,7 @@ INSTANCE 0:
 Total on generators:  183
 total cost of running:  482581.41344
 
-
+--- 0.0315279960632 seconds ---
 
 INSTANCE 1:
 
@@ -49,6 +49,8 @@ INSTANCE 1:
 Total on generators:  19
 total cost of running:  83360.0
 
+--- 0.016942024231 seconds ---
+
 INSTANCE 2:
 
     1  2  3  4  
@@ -64,6 +66,8 @@ INSTANCE 2:
 
 Total on generators:  18
 total cost of running:  95022.0
+
+--- 0.0216810703278 seconds ---
 
 INSTANCE 3:
  
@@ -85,6 +89,8 @@ INSTANCE 3:
 Total on generators:  53
 total cost of running:  530800.0
 
+--- 0.0237228870392 seconds ---
+
 INSTANCE 4:
 
     1  2  3  4  5  6  
@@ -103,6 +109,8 @@ INSTANCE 4:
  
 Total on generators:  52
 total cost of running:  430800.0
+
+--- 0.0223891735077 seconds ---
 
 INSTANCE 5:
 
@@ -169,7 +177,7 @@ INSTANCE 6:
 Total on generators:  108
 total cost of running:  261218.929
 
-
+--- 0.0150229930878 seconds ---
 
 INSTANCE 7:
 
@@ -203,6 +211,8 @@ INSTANCE 7:
 Total on generators:  161
 total cost of running:  402594.025
 
+--- 0.0274889469147 seconds ---
+
 INSTANCE 8:
 
     1  2  3  4  5  6  7  8  9 10 11 12 13  
@@ -235,6 +245,7 @@ INSTANCE 8:
 Total on generators:  138
 total cost of running:  348669.59594
 
+--- 0.02281498909 seconds ---
 
 INSTANCE 9:
 
@@ -268,6 +279,8 @@ INSTANCE 9:
 Total on generators:  209
 total cost of running:  571914.85244
 
+--- 0.028783082962 seconds ---
+
 INSTANCE 10:
 
     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17  
@@ -299,3 +312,5 @@ INSTANCE 10:
  
 Total on generators:  260
 total cost of running:  763979.46598
+
+--- 0.0186619758606 seconds ---
