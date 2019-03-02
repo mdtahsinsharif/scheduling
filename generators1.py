@@ -302,7 +302,7 @@ print "   ",
 
 for ty in range(len(generator_ids)):
     print str(generator_ids[ty]),
-    sheet1.write(generator_ids[ty], 0, generator_ids[ty])
+    sheet1.write(0, generator_ids[ty], generator_ids[ty])
     print "",
 print ""
 ti = total_time+1 - len(schedule)
@@ -310,16 +310,16 @@ row_excel = 1
 col = 0
 for x in range(len(schedule)):
     if ti<0:
-	sheet1.write(col,row_excel,str(ti))
+	sheet1.write(row_excel,col,str(ti))
 	print str(ti),
     elif ti < 10:
-	sheet1.write(col,row_excel,str(ti))
+	sheet1.write(row_excel,col,str(ti))
 	print "0"+str(ti),
     else:
-	sheet1.write(col,row_excel,str(ti))
+	sheet1.write(row_excel,col,str(ti))
 	print str(ti),
     for y in range(len(schedule[x])):
-	sheet1.write(y+1,row_excel,schedule[x][y])
+	sheet1.write(row_excel,y+1,schedule[x][y])
 	print schedule[x][y],"",
     print ""
     row_excel = row_excel+1;
@@ -335,6 +335,7 @@ print " "
 print "Total on generators: ", count_t
 print "total cost of running: ", t_cost
 print("--- %s seconds ---" % (time.time() - start_time))
+sheet1.write(row_excel+3,y+2,'time to run: ' + str(time.time() - start_time) + ' seconds')
 wb.save('Output_Matrices_instance_' + str(instance)) 
 
 
